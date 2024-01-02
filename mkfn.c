@@ -155,15 +155,20 @@ void mkfn_header(char *fontname)
 	trfn_cdefs();
 }
 
-int otf_read(void);
+int otf_read(FILE*);
 int afm_read(void);
 
+/* AFM files have separate metrics/glyph files
+ *    -f <path>=glyph file   stdin=metrics file
+ * TTF/OTF files combine these in a single file
+ *    -f <path>=<font file>
+ */
 static char *usage =
 	"Usage: mktrfn [options] <input >output\n"
 	"Options:\n"
 	"  -a      \tread an AFM file (default)\n"
 	"  -o      \tread a TTF or an OTF file\n"
-	"  -s      \tspecial font\n"
+/*	"  -s      \tspecial font\n" -- currently does nothing */
 	"  -p name \toverride font postscript name\n"
 	"  -t name \tset font troff name\n"
 	"  -f path \tset font path\n"
@@ -181,6 +186,7 @@ int main(int argc, char *argv[])
 {
 	int afm = 1;
 	int i;
+    FILE *f;
 	for (i = 1; i < argc && argv[i][0] == '-'; i++) {
 		switch (argv[i][1]) {
 		case 'a':
@@ -236,12 +242,22 @@ int main(int argc, char *argv[])
 			return 1;
 		}
 	}
+	if(!mkfn_path){
+		fprintf(stderr, "neatmkfn: -f<path> required\n%s", usage);
+		return 1;
+	}
+	if(!(f=fopen(mkfn_path,"rb"))){
+		fprintf(stderr, "neatmkfn: failed to open '%s'\n", mkfn_path);
+		return 1;
+	}
 	trfn_init();
-	if ((afm ? afm_read() : otf_read())) {
+	if ((afm ? afm_read() : otf_read(f))) {
 		fprintf(stderr, "neatmkfn: cannot parse the font\n");
 		trfn_done();
+		fclose(f);
 		return 1;
 	}
 	trfn_done();
+	fclose(f);
 	return 0;
 }

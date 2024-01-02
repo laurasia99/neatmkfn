@@ -1,4 +1,5 @@
 /* AFM fonts */
+/* https://adobe-type-tools.github.io/font-tech-notes/pdfs/5004.AFM_Spec.pdf */
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -22,6 +23,7 @@ static int uwid(int w)
 	long div = 72000 / mkfn_res;
 	return (w < 0 ? w - div / 20 : w + div / 20) * (long) 10 / div;
 }
+
 int afm_read(void)
 {
 	char ln[1024];
@@ -49,33 +51,35 @@ int afm_read(void)
 			break;
 		s = ln;
 		while (*s) {
+			/* 5004.AFM Ch 8 'Individual Character Metrics' */
 			s = afm_charfield(s, field);
-			if (!strcmp("C", field)) {
+			if (!strcmp("C", field)) {		/* Default char code; decimal; -1 not encoded */
 				s = afm_charfield(s, pos);
 				continue;
 			}
-			if (!strcmp("WX", field)) {
+			if (!strcmp("WX", field)) {		/* Character width */
 				s = afm_charfield(s, wid);
 				continue;
 			}
-			if (!strcmp("N", field)) {
+			if (!strcmp("N", field)) {		/* Postscript char name (optional in spec) */
 				s = afm_charfield(s, ch);
 				continue;
 			}
-			if (!strcmp("B", field)) {
+			if (!strcmp("B", field)) {		/* Bounding box llx lly urx ury (optional) */
 				s = afm_charfield(s, llx);
 				s = afm_charfield(s, lly);
 				s = afm_charfield(s, urx);
 				s = afm_charfield(s, ury);
 				continue;
 			}
-			if (!strcmp("L", field)) {
+			if (!strcmp("L", field)) {		/* L successor ligature (optional) */
 				s = afm_charfield(s, c1);
 				s = afm_charfield(s, c2);
 				continue;
 			}
 			break;
 		}
+		/* Fields N C WX */
 		if (ch[0] && pos[0] && wid[0])
 			mkfn_char(ch, atoi(pos), 0, uwid(atoi(wid)),
 				uwid(atoi(llx)), uwid(atoi(lly)),

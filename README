@@ -8,6 +8,10 @@ Neatmkfn cannot obtain glyph bounding boxes accurately.  Therefore, if
 you plan to use a font in Neateqn blocks, convert the font to TrueType
 and generate the font description from that.
 
+[Unix only]
 The included ./gen.sh script invokes mkfn to create a complete output
 device for neatroff.  Change the variables in that file before running
 it.
+
+[Windows]
+Refer to build scripts in the 'winroff' repository.
