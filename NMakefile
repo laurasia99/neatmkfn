@@ -1,0 +1,39 @@
+!IFNDEF _NMAKE_MKFN_INCLUDED
+_NMAKE_MKFN_INCLUDED=1
+
+!IFNDEF OBJ
+O=obj
+!ENDIF
+!IFNDEF S
+S=.
+!ENDIF
+
+CC = cl
+CFLAGS = /nologo /O2
+LDFLAGS = /nologo
+
+OBJS = $O\mkfn.obj $O\trfn.obj $O\sbuf.obj $O\tab.obj $O\afm.obj $O\otf.obj
+
+all:: mkfn.exe
+mkfn.exe: $(OBJS)
+	$(CC) /Fe:$@ $(OBJS) $(LDFLAGS)
+clean::
+	-del /Q $(OBJS) mkfn.exe
+
+#
+$O:
+    if not exist $O mkdir $O
+$O\mkfn.obj: $O $S\mkfn.c
+	$(CC) /c /Fo:$@ $(CFLAGS) $S\$(@B).c
+$O\trfn.obj: $O $S\trfn.c
+	$(CC) /c /Fo:$@ $(CFLAGS) $S\$(@B).c
+$O\sbuf.obj: $O $S\sbuf.c
+	$(CC) /c /Fo:$@ $(CFLAGS) $S\$(@B).c
+$O\tab.obj: $O $S\tab.c
+	$(CC) /c /Fo:$@ $(CFLAGS) $S\$(@B).c
+$O\afm.obj: $O $S\afm.c
+	$(CC) /c /Fo:$@ $(CFLAGS) $S\$(@B).c
+$O\otf.obj: $O $S\otf.c
+	$(CC) /c /Fo:$@ $(CFLAGS) $S\$(@B).c /DNO_UNISTD /DNO_ARPA_INET
+
+!ENDIF
